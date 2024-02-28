@@ -1,0 +1,52 @@
+SELECT *
+from `amazon_2024_valentines_best_sellers.csv` avbsc 
+limit 5
+
+/* decide to delate column and update tape of data */
+alter table `amazon_2024_valentines_best_sellers.csv` 
+drop column description;
+
+alter table `amazon_2024_valentines_best_sellers.csv` 
+drop column `price/value`;
+
+UPDATE `amazon_2024_valentines_best_sellers.csv` 
+SET reviewsCount = CAST(your_column_name AS integer);
+
+
+/* the highest rated gifts*/
+select title, `starsBreakdown/5star`, `starsBreakdown/3star` 
+from `amazon_2024_valentines_best_sellers.csv` avbsc
+group by  1, 2, 3 
+having `starsBreakdown/5star` > 0.7
+order by 2 desc;
+
+
+/* only gifts with number of opinions above average  */
+SELECT title, reviewsCount, ROUND((SELECT avg(reviewsCount) from `amazon_2024_valentines_best_sellers.csv` avbsc2), 2)  as average
+from `amazon_2024_valentines_best_sellers.csv` avbsc
+group by 1, 2
+having reviewsCount > average
+order by 2 asc;
+
+
+
+/* show all brand lego and percentage lego from all  */
+select title, brand, 
+(SELECT distinct count(brand) from `amazon_2024_valentines_best_sellers.csv` avbsc) as brand_count, 
+(SELECT DISTINCT COUNT(*) 
+        FROM `amazon_2024_valentines_best_sellers.csv`
+        WHERE brand LIKE '%LEGO%')  AS lego_count,
+            ROUND(((SELECT COUNT(*) 
+        FROM `amazon_2024_valentines_best_sellers.csv`
+        WHERE brand LIKE '%LEGO%')/(SELECT count(brand) from `amazon_2024_valentines_best_sellers.csv` avbsc))*100, 2) as percentage    
+from `amazon_2024_valentines_best_sellers.csv` avbsc
+GROUP BY title, brand;
+
+
+
+/* groups and divides by each brand  */
+SELECT title, brand, ROW_NUMBER() over ( partition by brand  ) as number
+from `amazon_2024_valentines_best_sellers.csv` avbsc
+WHERE brand is not null
+order by 2 desc; 
+
